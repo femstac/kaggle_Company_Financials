@@ -100,81 +100,6 @@ def get_unique_items_list_in_column(column_name):
 
 # Pipelines
 
-# # Function to generate bar chart
-# def create_bar_chart(x_axis=Segment, y_axis=Sales):
-    
-#     # Create a copy of the dataframe
-#     bar_df = df.copy()
-    
-#     #if the x-axis is 'Discount Band', set the categories and order
-#     if x_axis == Discount_Band:
-#         bar_df[x_axis]=pd.Categorical(bar_df[x_axis],
-#                                       categories= get_unique_items_list_in_column(Discount_Band), 
-#                                      ordered= True)
-    
-#     # Group the dataframe by the x-axis and sum the numerical columns
-#     bar_df = bar_df.groupby(x_axis).sum().reset_index().reset_index(drop=True)
-    
-#     # Select only the x-axis and y-axis columns
-#     bar_df = bar_df[[x_axis, y_axis]]
-    
-    
-
-#     def get_differentiating_color(value):
-    
-#         if value== bar_df[y_axis].max():
-#             return 'royalblue'
-#         elif value== bar_df[y_axis].min():
-#             return 'red'
-#         else:
-#             return 'gray'
-
-#     colors = [get_differentiating_color(value) for value in bar_df[y_axis]]
-    
-#     # Create a bar chart using Matplotlib
-#     fig, ax = plt.subplots()
-#     ax.bar(bar_df[x_axis], bar_df[y_axis], color= colors,)
-#     ax.set_xlabel(x_axis)
-#     ax.set_ylabel(y_axis)
-    
-#     # Set the y-axis ticks to display as real numbers instead of scientific notation
-#     ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f'))
-    
-#     # Reduce the font size of the x-axis tick labels
-#     # ax.set_xticklabels(ax.get_xticklabels(), fontsize=8)
-    
-#     # Wrap the x-axis tick labels
-#     tick_labels = [textwrap.fill(label, 10) for label in bar_df[x_axis]]
-#     ax.set_xticks(range(len(bar_df[x_axis])))
-#     ax.set_xticklabels(tick_labels, fontsize=9)
-    
-#     for label in ax.get_xticklabels():
-#         label.set_fontweight('bold')
-    
-#     st.pyplot(fig)
-
-
-
-
-
-# # Use columns to display widgets side by side 
-# first_chart_y_widget,first_chart_x_widget = st.columns(2)  
-    
-# # Create widgets to select the x-axis and y-axis columns
-# bar_x_axis = first_chart_x_widget.selectbox('Select x-axis column', Fact_Columns)
-# bar_y_axis = first_chart_y_widget.selectbox('Select y-axis column', Numerical_Columns)
-
-# #Title of the first chart
-# st.markdown(f'# Total {bar_y_axis} per {bar_x_axis}')
-
-
-# # Call the create_bar_chart function with the selected columns
-# create_bar_chart(bar_x_axis, bar_y_axis)
-
- 
-
-#======================================================
-
 
 # Function to generate bar chart
 def create_bar_table(x_axis=Segment, y_axis=Sales):
@@ -233,26 +158,33 @@ def plot_bar_chart(bar_df, bar_x_axis, bar_y_axis  ,colors):
     
     st.pyplot(fig)
 
+    
+    
+    
 def get_report_on_min_max_bar_values(bar_df,bar_x_axis, bar_y_axis):
     
     max_value = bar_df[bar_y_axis].max()
     
+    formatted_max_value = format(max_value,',')
+    
     max_category = bar_df.loc[bar_df[bar_y_axis] == max_value, bar_x_axis].iloc[0]
     
     min_value = bar_df[bar_y_axis].min()
+    
+    formatted_min_value = format(min_value,',')
     
     min_category = bar_df.loc[bar_df[bar_y_axis] == min_value, bar_x_axis].iloc[0]
     
     
     
     if bar_y_axis== Units_Sold:
-        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **{max_value}** units. \n#### The lowest is **\"{min_category}\"** with a value of **{min_value}** units.'
+        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **{formatted_max_value}** units. \n#### The lowest is **\"{min_category}\"** with a value of **{formatted_min_value}** units.'
     
     else:
-        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **\${max_value}**. \n#### The lowest is **\"{min_category}\"** with a value of **\${min_value}**.'
+        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **\${formatted_max_value}** \n#### The lowest is **\"{min_category}\"** with a value of **\${formatted_min_value}**'
         
     if max_value==min_value:
-        report =  f'### The Total {bar_y_axis} is the same across all The {bar_x_axis} with a value of **\${min_value}**.'
+        report =  f'### The Total {bar_y_axis} is the same across all The {bar_x_axis} with a value of **\${formatted_min_value}**.'
         
     return report
 
@@ -287,10 +219,60 @@ plot_bar_chart(bar_df, bar_x_axis, bar_y_axis, colors)
 
 
 
+# Create a function to generate a stacked bar chart
+def create_stacked_bar_chart(x_axis=Segment, y_axis=Sales, product_List= get_unique_items_list_in_column(Product)):
+    
+    #Create Complimentary colours for stacked graph
+    
+    complimentary_colors = ["#ba2649", "#ffa7ca", "#1a6b54", "#f7d560", "#5c3c92", "#f2a0a1"]
+    
+    
+    # Check if the x-axis is not 'Product'
+    if x_axis != Product:
+        
+        # Create a copy of the dataframe
+        products_df = df.copy()
 
-# # Create a multiselect widget for column selection
-# selected_columns = st.multiselect('Select columns', df.columns)
+        # Group the dataframe by x-axis and product and sum the y-axis values
+        products_df = products_df.groupby([x_axis, Product])[y_axis].sum().reset_index()
 
-# # Display the selected columns of the DataFrame
-# st.write(df[selected_columns])
+        # Filter the data to include only products in product_List
+        products_df = products_df[products_df[Product].isin(product_List)]
 
+        # Pivot the data to create a stacked bar chart
+        products_df_pivot = products_df.pivot(index=x_axis, columns= Product, values=y_axis).fillna(0)
+
+        # Create a stacked bar chart using Pandas
+        chart = products_df_pivot.plot(kind='bar', stacked=True)
+          
+        # Set the y-axis ticks to display as real numbers instead of scientific notation
+        chart.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f'))
+    
+        
+        # Wrap the x-axis tick labels
+        tick_labels = [textwrap.fill(label, 10) for label in bar_df[bar_x_axis]]
+        chart.set_xticks(range(len(bar_df[bar_x_axis])))
+        chart.set_xticklabels(tick_labels, fontsize=9)
+
+        for label in chart.get_xticklabels():
+            label.set_fontweight('bold')
+
+        # set rotation for x labels
+        chart.set_xticklabels(chart.get_xticklabels(), rotation=0)
+
+
+        # Display the chart in Streamlit
+        st.pyplot(chart.figure)
+        
+    else:
+        # Display a message if the x-axis is 'Product'
+        st.write(f'Product infograph for {y_axis} already available. Please select another section in the For Each drop down menu')
+        
+ 
+selected_products= st.multiselect('Select Product', get_unique_items_list_in_column(Product))
+
+
+
+
+# Call the create_stacked_bar_chart function with the selected columns
+create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)
