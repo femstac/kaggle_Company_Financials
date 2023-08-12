@@ -194,8 +194,8 @@ def get_report_on_min_max_bar_values(bar_df,bar_x_axis, bar_y_axis):
 first_chart_y_widget,first_chart_x_widget = st.columns(2)  
     
 # Create widgets to select the x-axis and y-axis columns
-bar_x_axis = first_chart_x_widget.selectbox('Select x-axis column', Fact_Columns)
-bar_y_axis = first_chart_y_widget.selectbox('Select y-axis column', Numerical_Columns)
+bar_x_axis = first_chart_x_widget.selectbox('For each', Fact_Columns)
+bar_y_axis = first_chart_y_widget.selectbox('Select total amount of :', Numerical_Columns)
 
     
 bar_df=create_bar_table(bar_x_axis, bar_y_axis)
@@ -215,7 +215,7 @@ plot_bar_chart(bar_df, bar_x_axis, bar_y_axis, colors)
 
 
 
-
+#=====================================================================
 
 
 
@@ -267,12 +267,121 @@ def create_stacked_bar_chart(x_axis=Segment, y_axis=Sales, product_List= get_uni
     else:
         # Display a message if the x-axis is 'Product'
         st.write(f'Product infograph for {y_axis} already available. Please select another section in the For Each drop down menu')
+    
+
+selected_products= st.multiselect('Select Product to view', get_unique_items_list_in_column(Product),
+                                  default= get_unique_items_list_in_column(Product))
+    
+#check if the selected product list is empty
+if selected_products != []:
+    # Call the create_stacked_bar_chart function with the selected columns
+    create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)  
+else:
+        #Display a select a product message
+    st.write(f'### Please Select a Product')
         
- 
-selected_products= st.multiselect('Select Product', get_unique_items_list_in_column(Product))
 
 
 
 
-# Call the create_stacked_bar_chart function with the selected columns
-create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)
+#=====================================================================
+
+
+
+def create_bump_chart(y_axis= Sales, categorical_label = Segment, year_considered= [min(df[Date].dt.year)], categorical_label_list = get_unique_items_list_in_column(Segment)):
+    
+    #convert years in list to a single string
+    year_list= ', '.join(map(str, year_considered))
+    
+    #check if year and category list is not empty
+    
+    if year_considered !=[] and categorical_label_list != []:
+        
+        #create copy of dataframe
+        bump_df= df.copy()
+        
+        #set date as the index of the new dataframe
+        bump_df = bump_df.set_index(Date)
+        
+        #Sort datafram by date
+        bump_df = bump_df.sort_values(by= Date)
+        
+        #group based on date and categories
+        bump_df = bump_df.groupby([Date, categorical_label])[y_axis].sum().reset_index().reset_index(drop=True)
+        
+        
+        #filter to include only items in the selected list
+        bump_df_filtered = bump_df[bump_df[categorical_label].isin(categorical_label_list)]
+        
+        #filter based on year
+        bump_df_filtered = bump_df_filtered[bump_df_filtered[Date]
+                                            .dt.year.isin(year_considered)].reset_index(drop=True)
+        
+        #pivot the data 
+        bump_df_pivot= bump_df_filtered.pivot(index=Date, columns=categorical_label, values = y_axis).fillna(0)
+        
+        
+        fig,ax = plt.subplots()
+        for column in bump_df_pivot.columns:
+            ax.plot(bump_df_pivot.index, bump_df_pivot[column], label=column)
+            ax.scatter(bump_df_pivot.index, bump_df_pivot[column])
+        
+        ax.legend()
+        
+        st.pyplot(fig)
+        
+create_bump_chart()
+        
+#========================================
+
+
+def scatter_chart(x_axis=Profit, y_axis= Units_Sold,
+                  fact_category=Segment, fact_subcategory_list=get_unique_items_list_in_column(Segment)):
+    
+    if fact_subcategory_list==[]:  
+        st.write(f'## Please Select the Subcategory of {fact_category} to view.')
+        
+    elif x_axis != y_axis:
+        scatter_df = df.copy()
+        
+        category_to_view = fact_subcategory_list
+        
+        scatter_df_filtered = scatter_df[scatter_df[fact_category].isin(category_to_view)]
+        
+        
+        fig,ax = plt.subplots()
+        for items in category_to_view:
+            scatter_df_filtered = scatter_df_filtered[scatter_df_filtered[fact_category]==items]
+            ax.scatter(scatter_df_filtered[x_axis],scatter_df_filtered[y_axis], label= items)
+            # ax.scatter()
+        
+        st.pyplot(fig)
+        
+
+scatter_chart(Units_Sold,Profit,Country,['Mexico'])
+    
+
+    
+    
+# Create widgets to select the x-axis and y-axis columns
+Scatter_x_axis = scatter_chart_x_widget.selectbox('Select for', Varying_Numerical_Columns)
+Scatter_y_axis = scatter_chart_y_widget.selectbox('Select for :', Varying_Numerical_Columns)
+Scatter_Category_to_view = scatter_chart_y_widget.selectbox('Select for :',                        
+                                                            get_unique_items_list_in_column(Product))
+
+
+
+selected_category= st.multiselect('Select Category to view', get_unique_items_list_in_column(Product),
+                                  default= get_unique_items_list_in_column(Product))
+    
+#check if the selected product list is empty
+if selected_products != []:
+    # Call the create_stacked_bar_chart function with the selected columns
+    create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)  
+else:
+        #Display a select a product message
+    st.write(f'### Please Select a Product')
+        
+
+
+
