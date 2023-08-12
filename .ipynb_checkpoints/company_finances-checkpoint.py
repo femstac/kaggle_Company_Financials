@@ -332,55 +332,85 @@ def create_bump_chart(y_axis= Sales, categorical_label = Segment, year_considere
         
 create_bump_chart()
         
+    
+    
+    
+    
+    
+    
 #========================================
 
 
-def scatter_chart(x_axis=Profit, y_axis= Units_Sold,
-                  fact_category=Segment, fact_subcategory_list=get_unique_items_list_in_column(Segment)):
+# def scatter_chart(x_axis=Profit,
+#                   y_axis= Units_Sold,
+#                   fact_category=Segment,
+#                   fact_subcategory_list=get_unique_items_list_in_column(Segment)):
     
-    if fact_subcategory_list==[]:  
-        st.write(f'## Please Select the Subcategory of {fact_category} to view.')
-        
-    elif x_axis != y_axis:
+def scatter_chart(x_axis,
+                  y_axis,
+                  fact_category,
+                  fact_subcategory_list):
+    
+   
+    if x_axis != y_axis:
         scatter_df = df.copy()
+        scatter_df_filtered = scatter_df[scatter_df[fact_category].isin(fact_subcategory_list)].reset_index().reset_index(drop=True)
+        scatter_df_filtered = scatter_df_filtered[[x_axis,y_axis,fact_category]]
         
-        category_to_view = fact_subcategory_list
+        scatter_df_filtered = scatter_df_filtered.sort_values(by=fact_category)
+                
+        complimentary_colors = ["#ba2649", "#ffa7ca", "#1a6b54", "#f7d560", "#5c3c92", "#f2a0a1"]   
         
-        scatter_df_filtered = scatter_df[scatter_df[fact_category].isin(category_to_view)]
-        
-        
+        colors = dict(zip(fact_subcategory_list, complimentary_colors))
+       
+        scatter_colors= [colors[c] for c in  scatter_df_filtered[fact_category]]
+
         fig,ax = plt.subplots()
-        for items in category_to_view:
-            scatter_df_filtered = scatter_df_filtered[scatter_df_filtered[fact_category]==items]
-            ax.scatter(scatter_df_filtered[x_axis],scatter_df_filtered[y_axis], label= items)
+        ax.scatter(scatter_df_filtered[x_axis], scatter_df_filtered[y_axis], color=scatter_colors,  )
+        
+        for parts in fact_subcategory_list :
+            plt.scatter([],[], c=colors[parts], label=parts )
+            plt.legend()
+        # for items in fact_subcategory_list:
+        #     scatter_df_filtered = scatter_df_filtered[scatter_df_filtered[fact_category]==items]
+        #     ax.scatter(scatter_df_filtered[x_axis], scatter_df_filtered[y_axis], color=complimentary_colors)
             # ax.scatter()
         
         st.pyplot(fig)
+        with st.expander("show table"):
+            st.write(scatter_df_filtered)
+    
+    else:
+        st.write(f'## Please Select different X and Y Axes to view Relationship.')
         
 
-scatter_chart(Units_Sold,Profit,Country,['Mexico'])
+ 
     
+scatter_chart_x_widget, scatter_chart_y_widget = st.columns(2)
 
     
     
 # Create widgets to select the x-axis and y-axis columns
-Scatter_x_axis = scatter_chart_x_widget.selectbox('Select for', Varying_Numerical_Columns)
-Scatter_y_axis = scatter_chart_y_widget.selectbox('Select for :', Varying_Numerical_Columns)
-Scatter_Category_to_view = scatter_chart_y_widget.selectbox('Select for :',                        
-                                                            get_unique_items_list_in_column(Product))
+Scatter_x_axis = scatter_chart_x_widget.selectbox('Select X axis', Varying_Numerical_Columns)
+Scatter_y_axis = scatter_chart_y_widget.selectbox('Select y axis :', Varying_Numerical_Columns)
+Scatter_Category_to_view = scatter_chart_x_widget.selectbox('Select Category :', Fact_Columns)
 
 
-
-selected_category= st.multiselect('Select Category to view', get_unique_items_list_in_column(Product),
-                                  default= get_unique_items_list_in_column(Product))
+selected_category= st.multiselect('Select Subcategory to view',     
+                                  get_unique_items_list_in_column(Scatter_Category_to_view),
+                                  default= get_unique_items_list_in_column(Scatter_Category_to_view))
     
 #check if the selected product list is empty
-if selected_products != []:
+if selected_category != []:
     # Call the create_stacked_bar_chart function with the selected columns
-    create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)  
+    scatter_chart(Scatter_x_axis, Scatter_y_axis, Scatter_Category_to_view, selected_category)  
+    
 else:
         #Display a select a product message
-    st.write(f'### Please Select a Product')
+        st.write(f'### Please select the subcategory of {Scatter_Category_to_view} to view.')
+        
+
+
         
 
 
