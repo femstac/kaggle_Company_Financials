@@ -228,16 +228,16 @@ def get_report_on_min_max_bar_values(bar_df, bar_x_axis, bar_y_axis):
     # Check if the y-axis is 'Units Sold'
     if bar_y_axis == Units_Sold:
         # Generate a report for 'Units Sold'
-        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **{formatted_max_value}** units. \n#### The lowest is **\"{min_category}\"** with a value of **{formatted_min_value}** units.'
+        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of :green[**{formatted_max_value}**] units. \n#### The lowest is **\"{min_category}\"** with a value of :red[**{formatted_min_value}**] units.'
     
     else:
         # Generate a report for other y-axis values
-        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **\${formatted_max_value}** \n#### The lowest is **\"{min_category}\"** with a value of **\${formatted_min_value}**'
+        report = f'#### The {bar_x_axis} **\"{max_category}\"** has the highest Total {bar_y_axis} value of :green[**\${formatted_max_value}**] \n#### The lowest is **\"{min_category}\"** with a value of :red[**\${formatted_min_value}**]'
         
     # Check if the maximum and minimum values are equal
     if max_value == min_value:
         # Generate a report for equal values
-        report = f'### The Total {bar_y_axis} is the same across all The {bar_x_axis} with a value of **\${formatted_min_value}**.'
+        report = f'#### The Total {bar_y_axis} is the same across all The {bar_x_axis} with a value of :green[**\${formatted_min_value}**].'
         
     return report
 
@@ -297,11 +297,11 @@ def create_stacked_bar_chart(x_axis, y_axis, product_List):
         chart.set_xticklabels(chart.get_xticklabels(), rotation=0)
 
         # Display the chart in Streamlit
-        scatter_chart.pyplot(chart.figure)
+        stacked_chart.pyplot(chart.figure)
         
     else:
         # Display a message if the x-axis is 'Product'
-        scatter_chart.write(f'Product infograph for {y_axis} already available. Please select another section in the For Each drop down menu')
+        stacked_chart.write(f'Product infograph for {y_axis} already available. Please select another section in the For Each drop down menu')
 
 #====================================================================
 
@@ -321,7 +321,7 @@ def create_bump_chart(y_axis, categorical_label, year_considered, categorical_la
     """
      
     # Convert the year_considered list to a string
-    year_list_str = ', '.join(map(str, year_considered))
+    get_year_as_String(year_considered)
 
     # Check if year_considered and categorical_label_list are not empty
     if year_considered != [] and categorical_label_list != []:
@@ -420,6 +420,7 @@ def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
         fig, ax = plt.subplots()
         ax.scatter(scatter_df_filtered[x_axis], scatter_df_filtered[y_axis], color=scatter_colors)
         
+        
         # Add a legend to the chart
         for parts in fact_subcategory_list:
             plt.scatter([], [], c=colors[parts], label=parts)
@@ -429,7 +430,7 @@ def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
         scatter_chart.pyplot(fig)
         
         # Display an expander with the data used to create the chart
-        with st.expander("show table"):
+        with st.expander(f'## :memo: **Click to Show Correlation Table**'):
             st.write(scatter_df_filtered)
     
     else:
@@ -442,13 +443,39 @@ def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
 #======================================================================================================
 
 
+def get_year_as_String(year_considered):
+     # Convert the year_considered list to a string
+    year_list_str = ', '.join(map(str, year_considered))
+    
+    return year_list_str
+
+#======================================================================================================
+
+
+
+
+
+st.title(':chart: :office: Interactive Web App for Analysis of a Company\'s Financial Record' )
+
+st.divider()
+st.markdown('    ')
+
+
+st.markdown(f'## VISUALIZATION 1: :blue[BAR CHART] & :blue[STACKED BAR CHART]')
+
+
+st.markdown('    ')
+
+ 
+
+
 # Use columns to display widgets side by side 
 first_chart_y_widget,first_chart_x_widget = st.columns(2)  
 
     
 # Create widgets to select the x-axis and y-axis columns
-bar_x_axis = first_chart_x_widget.selectbox('For each', Fact_Columns)
-bar_y_axis = first_chart_y_widget.selectbox('Select total amount of :', Numerical_Columns)
+bar_x_axis = first_chart_x_widget.selectbox('**For each**', Fact_Columns)
+bar_y_axis = first_chart_y_widget.selectbox('**Select total amount of :**', Numerical_Columns)
 
     
 bar_df=create_bar_table(bar_x_axis, bar_y_axis)
@@ -457,20 +484,23 @@ colors = [get_differentiating_color(bar_df, bar_y_axis, value) for value in bar_
     
 
 #Title of the first chart
-st.markdown(f'# Total {bar_y_axis} per {bar_x_axis}')
+st.markdown(f'### Total {bar_y_axis} per {bar_x_axis} ')
 st.markdown(get_report_on_min_max_bar_values(bar_df,bar_x_axis, bar_y_axis))
 
 
-selected_products= st.multiselect('Select Products to view', get_unique_items_list_in_column(Product),
+selected_products= st.multiselect('**Select Products to view**', get_unique_items_list_in_column(Product),
                                   default= get_unique_items_list_in_column(Product),
                                    key='selected_products')
     
 
-bar_chart, scatter_chart= st.columns(2)
+bar_chart, stacked_chart= st.columns(2)
 
 
 # Call the create_bar_chart function with the selected columns
 plot_bar_chart(bar_df, bar_x_axis, bar_y_axis, colors)
+
+st.markdown('''---''')
+st.markdown('''---''')
 
 
 #================================================================================================
@@ -482,63 +512,71 @@ if selected_products != []:
     create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)  
 else:
         #Display a select a product message
-    scatter_chart.write(f'#### Please Select Products to view how the {bar_x_axis} is subdivided')
+    stacked_chart.write(f'#### Please Select Products to view how the {bar_x_axis} is subdivided')
         
     
         
 #======================================================================================================        
-        
+
+st.markdown(f'## VISUALIZATION 2 : :blue[BUMP CHART]')
+
 
 bump_chart_x_widget, bump_chart_y_widget = st.columns(2)
   
     
 # Create widgets to select the x-axis and y-axis columns
-bump_x_widget= bump_chart_x_widget.selectbox('Select X axis', Fact_Columns)
-bump_y_widget=bump_chart_y_widget.selectbox('Select y axis :', Numerical_Columns)
+bump_x_widget= bump_chart_x_widget.selectbox('**Select Category :**', Fact_Columns)
+
+bump_y_widget=bump_chart_y_widget.selectbox('**Select Numerical Section :**', Numerical_Columns)
 
 
- 
 
-categorical_label_list= st.multiselect('Select Subcategory to view',  get_unique_items_list_in_column(bump_x_widget),
+categorical_label_list= st.multiselect('**Select Subcategories to view :**',  get_unique_items_list_in_column(bump_x_widget),
                                   default= get_unique_items_list_in_column(bump_x_widget))
 
-year_considered = st.multiselect('Select Category :', get_unique_items_list_in_column(Date), default = [min(df['Date'].dt.year)])
+year_considered = st.multiselect('**Select Year :**', get_unique_items_list_in_column(Date), default = [min(df['Date'].dt.year)])
+
+
+st.markdown(f'#### Total {bump_y_widget} in each {bump_x_widget} in the year {get_year_as_String(year_considered)} ')
 
 # Create a column using the st.columns function
 bump_chart= st.columns(1)[0]     
 
 create_bump_chart(bump_y_widget, bump_x_widget, year_considered , categorical_label_list)
     
- 
-    
+
+st.markdown('''---''')
+st.markdown('''---''')
 #======================================================================================================
- 
+
+st.markdown(f'## VISUALIZATION 3 :  :blue[ SCATTER CHART]')
+
+
+st.markdown('    ')
     
 scatter_chart_x_widget, scatter_chart_y_widget = st.columns(2)
-
-    
-    
+ 
 # Create widgets to select the x-axis and y-axis columns
-Scatter_x_axis = scatter_chart_x_widget.selectbox('Select X axis', Varying_Numerical_Columns, index= 0 )
-Scatter_y_axis = scatter_chart_y_widget.selectbox('Select y axis :', Varying_Numerical_Columns, index= 1)
-Scatter_Category_to_view = scatter_chart_x_widget.selectbox('Select Category :', Fact_Columns)
+Scatter_x_axis = scatter_chart_x_widget.selectbox('**Select X-axis :**', Varying_Numerical_Columns, index= 0 )
+
+Scatter_y_axis = scatter_chart_y_widget.selectbox('**Select Y-axis :**', Varying_Numerical_Columns, index= 1)
+
+Scatter_Category_to_view = scatter_chart_x_widget.selectbox('**Select the Category :**', Fact_Columns)
 
 
-selected_category= st.multiselect('Select Subcategory to view',     
+selected_category= st.multiselect('**Select Subcategory to view**',     
                                   get_unique_items_list_in_column(Scatter_Category_to_view),
                                   default= get_unique_items_list_in_column(Scatter_Category_to_view),
                                    key='selected_category')
 
-
+st.markdown(f'#### Relationship between {Scatter_x_axis} and {Scatter_y_axis} for Selected {Scatter_Category_to_view} ')
     
 #check if the selected product list is empty
 if selected_category != []:
     # Call the create_stacked_bar_chart function with the selected columns
-    scatter_chart(Scatter_x_axis, Scatter_y_axis, Scatter_Category_to_view, selected_category)
-    
     scatter_chart=st.columns(1)[0]
+    create_scatter_chart(Scatter_x_axis, Scatter_y_axis, Scatter_Category_to_view, selected_category)
     
-
     
 else:
         #Display a select a product message

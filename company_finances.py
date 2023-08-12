@@ -102,15 +102,26 @@ def get_unique_items_list_in_column(column_name):
 #======================================================================================================
 # Function to generate bar chart
 def create_bar_table(x_axis, y_axis):
+    """
+    Generates a table for a bar chart.
+    
+    Parameters:
+    x_axis: The column name to use as the x-axis.
+    y_axis: The column name to use as the y-axis.
+    
+    Returns:
+    bar_df: A dataframe containing the data for the bar chart.
+    """
     
     # Create a copy of the dataframe
     bar_df = df.copy()
     
-    #if the x-axis is 'Discount Band', set the categories and order
+    # Check if the x-axis is 'Discount Band'
     if x_axis == Discount_Band:
-        bar_df[x_axis]=pd.Categorical(bar_df[x_axis],
-                                      categories= get_unique_items_list_in_column(Discount_Band), 
-                                     ordered= True)
+        # Set the categories and order for the 'Discount Band' column
+        bar_df[x_axis] = pd.Categorical(bar_df[x_axis],
+                                        categories=get_unique_items_list_in_column(Discount_Band),
+                                        ordered=True)
     
     # Group the dataframe by the x-axis and sum the numerical columns
     bar_df = bar_df.groupby(x_axis).sum().reset_index().reset_index(drop=True)
@@ -119,22 +130,46 @@ def create_bar_table(x_axis, y_axis):
     bar_df = bar_df[[x_axis, y_axis]]
     
     return bar_df
+
  
 #======================================================================================================    
 
 
-
 def get_differentiating_color(bar_df, y_axis, value):
-    if value== bar_df[y_axis].max():
+    """
+    Returns a color based on the value of a bar in a bar chart.
+    
+    Parameters:
+    bar_df: The dataframe containing the data for the bar chart.
+    y_axis: The column name to use as the y-axis.
+    value: The value of the bar to get the color for.
+    
+    Returns:
+    color: A string representing the color of the bar. 'royalblue' if the value is the maximum value in the y-axis column, 'red' if it is the minimum value, and 'gray' otherwise.
+    """
+    
+    # Check if the value is the maximum or minimum value in the y-axis column
+    if value == bar_df[y_axis].max():
         return 'royalblue'
-    elif value== bar_df[y_axis].min():
+    elif value == bar_df[y_axis].min():
         return 'red'
     else:
         return 'gray'
-
 #======================================================================================================   
     
-def plot_bar_chart(bar_df, bar_x_axis, bar_y_axis  ,colors):
+def plot_bar_chart(bar_df, bar_x_axis, bar_y_axis, colors):
+    """
+    Plots a bar chart using Matplotlib.
+    
+    Parameters:
+    bar_df: The dataframe containing the data for the bar chart.
+    bar_x_axis: The column name to use as the x-axis.
+    bar_y_axis: The column name to use as the y-axis.
+    colors: A list of colors to use for each bar in the chart.
+    
+    Returns:
+    None
+    """
     # Create a bar chart using Matplotlib
     fig, ax = plt.subplots()
     ax.bar(bar_df[bar_x_axis], bar_df[bar_y_axis],  color= colors,)
@@ -155,35 +190,54 @@ def plot_bar_chart(bar_df, bar_x_axis, bar_y_axis  ,colors):
     for label in ax.get_xticklabels():
         label.set_fontweight('bold')
     
-    chart1.pyplot(fig)
+    bar_chart.pyplot(fig)
 
 #======================================================================================================   
     
+def get_report_on_min_max_bar_values(bar_df, bar_x_axis, bar_y_axis):
+    """
+    Generates a report on the minimum and maximum values in a bar chart.
     
-def get_report_on_min_max_bar_values(bar_df,bar_x_axis, bar_y_axis):
+    Parameters:
+    bar_df: The dataframe containing the data for the bar chart.
+    bar_x_axis: The column name to use as the x-axis.
+    bar_y_axis: The column name to use as the y-axis.
     
+    Returns:
+    report: A string containing a report on the minimum and maximum values in the y-axis column of the dataframe.
+    """
+    
+    # Get the maximum value in the y-axis column
     max_value = bar_df[bar_y_axis].max()
     
-    formatted_max_value = format(max_value,',')
+    # Format the maximum value as a string with thousands separators
+    formatted_max_value = format(max_value, ',')
     
+    # Get the category associated with the maximum value
     max_category = bar_df.loc[bar_df[bar_y_axis] == max_value, bar_x_axis].iloc[0]
     
+    # Get the minimum value in the y-axis column
     min_value = bar_df[bar_y_axis].min()
     
-    formatted_min_value = format(min_value,',')
+    # Format the minimum value as a string with thousands separators
+    formatted_min_value = format(min_value, ',')
     
+    # Get the category associated with the minimum value
     min_category = bar_df.loc[bar_df[bar_y_axis] == min_value, bar_x_axis].iloc[0]
     
-    
-    
-    if bar_y_axis== Units_Sold:
-        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **{formatted_max_value}** units. \n#### The lowest is **\"{min_category}\"** with a value of **{formatted_min_value}** units.'
+    # Check if the y-axis is 'Units Sold'
+    if bar_y_axis == Units_Sold:
+        # Generate a report for 'Units Sold'
+        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of :green[**{formatted_max_value}**] units. \n#### The lowest is **\"{min_category}\"** with a value of :red[**{formatted_min_value}**] units.'
     
     else:
-        report = f'### The {bar_x_axis}  **\"{max_category}\"** has the highest Total {bar_y_axis} value of **\${formatted_max_value}** \n#### The lowest is **\"{min_category}\"** with a value of **\${formatted_min_value}**'
+        # Generate a report for other y-axis values
+        report = f'#### The {bar_x_axis} **\"{max_category}\"** has the highest Total {bar_y_axis} value of :green[**\${formatted_max_value}**] \n#### The lowest is **\"{min_category}\"** with a value of :red[**\${formatted_min_value}**]'
         
-    if max_value==min_value:
-        report =  f'### The Total {bar_y_axis} is the same across all The {bar_x_axis} with a value of **\${formatted_min_value}**.'
+    # Check if the maximum and minimum values are equal
+    if max_value == min_value:
+        # Generate a report for equal values
+        report = f'#### The Total {bar_y_axis} is the same across all The {bar_x_axis} with a value of :green[**\${formatted_min_value}**].'
         
     return report
 
@@ -192,19 +246,24 @@ def get_report_on_min_max_bar_values(bar_df,bar_x_axis, bar_y_axis):
 
 #=====================================================================
 
-
-
-# Create a function to generate a stacked bar chart
 def create_stacked_bar_chart(x_axis, y_axis, product_List):
+    """
+    Generates a stacked bar chart using Pandas.
     
-    #Create Complimentary colours for stacked graph
+    Parameters:
+    x_axis: The column name to use as the x-axis.
+    y_axis: The column name to use as the y-axis.
+    product_List: A list of products to include in the chart.
     
+    Returns:
+    None
+    """
+    
+    # Define a list of complimentary colors for the stacked bar chart
     complimentary_colors = ["#ba2649", "#ffa7ca", "#1a6b54", "#f7d560", "#5c3c92", "#f2a0a1"]
-    
     
     # Check if the x-axis is not 'Product'
     if x_axis != Product:
-        
         # Create a copy of the dataframe
         products_df = df.copy()
 
@@ -215,35 +274,34 @@ def create_stacked_bar_chart(x_axis, y_axis, product_List):
         products_df = products_df[products_df[Product].isin(product_List)]
 
         # Pivot the data to create a stacked bar chart
-        products_df_pivot = products_df.pivot(index=x_axis, columns= Product, values=y_axis).fillna(0)
+        products_df_pivot = products_df.pivot(index=x_axis, columns=Product, values=y_axis).fillna(0)
 
         # Create a stacked bar chart using Pandas
-        chart = products_df_pivot.plot(kind='bar', stacked=True)
-          
+        chart = products_df_pivot.plot(kind='bar', stacked=True, color=complimentary_colors)
+        
         # Set the y-axis ticks to display as real numbers instead of scientific notation
         chart.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f'))
-    
         
         # Wrap the x-axis tick labels
         tick_labels = [textwrap.fill(label, 10) for label in bar_df[bar_x_axis]]
+        
+        # Set the x-axis ticks and tick labels
         chart.set_xticks(range(len(bar_df[bar_x_axis])))
         chart.set_xticklabels(tick_labels, fontsize=9)
-
+        
+        # Set the font weight of the x-axis tick labels to bold
         for label in chart.get_xticklabels():
             label.set_fontweight('bold')
-
-        # set rotation for x labels
+        
+        # Set the rotation of the x-axis tick labels to 0 degrees
         chart.set_xticklabels(chart.get_xticklabels(), rotation=0)
 
-
         # Display the chart in Streamlit
-        chart2.pyplot(chart.figure)
+        stacked_chart.pyplot(chart.figure)
         
     else:
         # Display a message if the x-axis is 'Product'
-        chart2.write(f'Product infograph for {y_axis} already available. Please select another section in the For Each drop down menu')
-
-
+        stacked_chart.write(f'Product infograph for {y_axis} already available. Please select another section in the For Each drop down menu')
 
 #====================================================================
 
@@ -263,7 +321,7 @@ def create_bump_chart(y_axis, categorical_label, year_considered, categorical_la
     """
      
     # Convert the year_considered list to a string
-    year_list_str = ', '.join(map(str, year_considered))
+    get_year_as_String(year_considered)
 
     # Check if year_considered and categorical_label_list are not empty
     if year_considered != [] and categorical_label_list != []:
@@ -307,60 +365,108 @@ def create_bump_chart(y_axis, categorical_label, year_considered, categorical_la
         ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
         ax.legend()
         
-        st.pyplot(fig)
+        bump_chart.pyplot(fig)
         # plt.show()
         
     elif year_considered == []:
         # Display a message if no years are selected
-        st.write('Please select the year to view.')
+        bump_chart.write('Please select the year to view.')
     elif categorical_label_list == []:
         # Display a message if no categorical labels are selected
-        st.write('Please select at least one category.')
+        bump_chart.write('Please select at least one category.')
 
     
     
 #======================================================================================================
-def scatter_chart(x_axis,
-                  y_axis,
-                  fact_category,
-                  fact_subcategory_list):
+
+def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
+    """
+    Generates a scatter chart using Matplotlib.
     
-   
+    Parameters:
+    x_axis: The column name to use as the x-axis.
+    y_axis: The column name to use as the y-axis.
+    fact_category: The column name to use as the category for coloring the points.
+    fact_subcategory_list: A list of subcategories to include in the chart.
+    
+    Returns:
+    None
+    """
+    
+    # Check if the x-axis and y-axis are different
     if x_axis != y_axis:
+        # Create a copy of the dataframe
         scatter_df = df.copy()
+        
+        # Filter the data to include only subcategories in fact_subcategory_list
         scatter_df_filtered = scatter_df[scatter_df[fact_category].isin(fact_subcategory_list)].reset_index().reset_index(drop=True)
-        scatter_df_filtered = scatter_df_filtered[[x_axis,y_axis,fact_category]]
         
+        # Select only the x-axis, y-axis, and fact_category columns
+        scatter_df_filtered = scatter_df_filtered[[x_axis, y_axis, fact_category]]
+        
+        # Sort the data by fact_category
         scatter_df_filtered = scatter_df_filtered.sort_values(by=fact_category)
-                
-        complimentary_colors = ["#ba2649", "#ffa7ca", "#1a6b54", "#f7d560", "#5c3c92", "#f2a0a1"]   
         
+        # Define a list of complimentary colors for the scatter chart
+        complimentary_colors = ["#ba2649", "#ffa7ca", "#1a6b54", "#f7d560", "#5c3c92", "#f2a0a1"]
+        
+        # Create a dictionary mapping subcategories to colors
         colors = dict(zip(fact_subcategory_list, complimentary_colors))
        
-        scatter_colors= [colors[c] for c in  scatter_df_filtered[fact_category]]
+        # Create a list of colors for each point in the chart
+        scatter_colors = [colors[c] for c in scatter_df_filtered[fact_category]]
 
-        fig,ax = plt.subplots()
-        ax.scatter(scatter_df_filtered[x_axis], scatter_df_filtered[y_axis], color=scatter_colors,  )
+        # Create a scatter chart using Matplotlib
+        fig, ax = plt.subplots()
+        ax.scatter(scatter_df_filtered[x_axis], scatter_df_filtered[y_axis], color=scatter_colors)
         
-        for parts in fact_subcategory_list :
-            plt.scatter([],[], c=colors[parts], label=parts )
+        
+        # Add a legend to the chart
+        for parts in fact_subcategory_list:
+            plt.scatter([], [], c=colors[parts], label=parts)
             plt.legend()
-        # for items in fact_subcategory_list:
-        #     scatter_df_filtered = scatter_df_filtered[scatter_df_filtered[fact_category]==items]
-        #     ax.scatter(scatter_df_filtered[x_axis], scatter_df_filtered[y_axis], color=complimentary_colors)
-            # ax.scatter()
         
-        st.pyplot(fig)
-        with st.expander("show table"):
+        # Display the chart in Streamlit
+        scatter_chart.pyplot(fig)
+        
+        # Display an expander with the data used to create the chart
+        with st.expander(f'## :memo: **Click to Show Correlation Table**'):
             st.write(scatter_df_filtered)
     
     else:
-        st.write(f'## Please Select different X and Y Axes to view Relationship.')
-    
+        # Display a message if the x-axis and y-axis are the same
+        scatter_chart.write(f'## Please Select different X and Y Axes to view Relationship.')
+
 
         
 
 #======================================================================================================
+
+
+def get_year_as_String(year_considered):
+     # Convert the year_considered list to a string
+    year_list_str = ', '.join(map(str, year_considered))
+    
+    return year_list_str
+
+#======================================================================================================
+
+
+
+
+
+st.title(':chart: :office: Interactive Web App for Analysis of a Company\'s Financial Record' )
+
+st.divider()
+st.markdown('    ')
+
+
+st.markdown(f'## VISUALIZATION 1: :blue[BAR CHART] & :blue[STACKED BAR CHART]')
+
+
+st.markdown('    ')
+
+ 
 
 
 # Use columns to display widgets side by side 
@@ -368,8 +474,8 @@ first_chart_y_widget,first_chart_x_widget = st.columns(2)
 
     
 # Create widgets to select the x-axis and y-axis columns
-bar_x_axis = first_chart_x_widget.selectbox('For each', Fact_Columns)
-bar_y_axis = first_chart_y_widget.selectbox('Select total amount of :', Numerical_Columns)
+bar_x_axis = first_chart_x_widget.selectbox('**For each**', Fact_Columns)
+bar_y_axis = first_chart_y_widget.selectbox('**Select total amount of :**', Numerical_Columns)
 
     
 bar_df=create_bar_table(bar_x_axis, bar_y_axis)
@@ -378,19 +484,23 @@ colors = [get_differentiating_color(bar_df, bar_y_axis, value) for value in bar_
     
 
 #Title of the first chart
-st.markdown(f'# Total {bar_y_axis} per {bar_x_axis}')
+st.markdown(f'### Total {bar_y_axis} per {bar_x_axis} ')
 st.markdown(get_report_on_min_max_bar_values(bar_df,bar_x_axis, bar_y_axis))
 
 
-selected_products= st.multiselect('Select Products to view', get_unique_items_list_in_column(Product),
-                                  default= get_unique_items_list_in_column(Product))
+selected_products= st.multiselect('**Select Products to view**', get_unique_items_list_in_column(Product),
+                                  default= get_unique_items_list_in_column(Product),
+                                   key='selected_products')
     
 
-chart1, chart2= st.columns(2)
+bar_chart, stacked_chart= st.columns(2)
 
 
 # Call the create_bar_chart function with the selected columns
 plot_bar_chart(bar_df, bar_x_axis, bar_y_axis, colors)
+
+st.markdown('''---''')
+st.markdown('''---''')
 
 
 #================================================================================================
@@ -402,59 +512,75 @@ if selected_products != []:
     create_stacked_bar_chart(bar_x_axis, bar_y_axis, selected_products)  
 else:
         #Display a select a product message
-    chart2.write(f'#### Please Select Products to view how the {bar_x_axis} is subdivided')
+    stacked_chart.write(f'#### Please Select Products to view how the {bar_x_axis} is subdivided')
         
     
         
 #======================================================================================================        
-        
+
+st.markdown(f'## VISUALIZATION 2 : :blue[BUMP CHART]')
+
 
 bump_chart_x_widget, bump_chart_y_widget = st.columns(2)
- 
-    
+  
     
 # Create widgets to select the x-axis and y-axis columns
-bump_x_widget= bump_chart_x_widget.selectbox('Select X axis', Fact_Columns)
-bump_y_widget=bump_chart_y_widget.selectbox('Select y axis :', Numerical_Columns)
+bump_x_widget= bump_chart_x_widget.selectbox('**Select Category :**', Fact_Columns)
+
+bump_y_widget=bump_chart_y_widget.selectbox('**Select Numerical Section :**', Numerical_Columns)
 
 
 
-categorical_label_list= st.multiselect('Select Subcategory to view',  get_unique_items_list_in_column(bump_x_widget),
+categorical_label_list= st.multiselect('**Select Subcategories to view :**',  get_unique_items_list_in_column(bump_x_widget),
                                   default= get_unique_items_list_in_column(bump_x_widget))
 
-year_considered = st.multiselect('Select Category :', get_unique_items_list_in_column(Date), default = [min(df['Date'].dt.year)])
+year_considered = st.multiselect('**Select Year :**', get_unique_items_list_in_column(Date), default = [min(df['Date'].dt.year)])
 
-        
+
+st.markdown(f'#### Total {bump_y_widget} in each {bump_x_widget} in the year {get_year_as_String(year_considered)} ')
+
+# Create a column using the st.columns function
+bump_chart= st.columns(1)[0]     
 
 create_bump_chart(bump_y_widget, bump_x_widget, year_considered , categorical_label_list)
     
-    
-    
+
+st.markdown('''---''')
+st.markdown('''---''')
 #======================================================================================================
- 
+
+st.markdown(f'## VISUALIZATION 3 :  :blue[ SCATTER CHART]')
+
+
+st.markdown('    ')
     
 scatter_chart_x_widget, scatter_chart_y_widget = st.columns(2)
-
-    
-    
+ 
 # Create widgets to select the x-axis and y-axis columns
-Scatter_x_axis = scatter_chart_x_widget.selectbox('Select X axis', Varying_Numerical_Columns, index= 0 )
-Scatter_y_axis = scatter_chart_y_widget.selectbox('Select y axis :', Varying_Numerical_Columns, index= 1)
-Scatter_Category_to_view = scatter_chart_x_widget.selectbox('Select Category :', Fact_Columns)
+Scatter_x_axis = scatter_chart_x_widget.selectbox('**Select X-axis :**', Varying_Numerical_Columns, index= 0 )
+
+Scatter_y_axis = scatter_chart_y_widget.selectbox('**Select Y-axis :**', Varying_Numerical_Columns, index= 1)
+
+Scatter_Category_to_view = scatter_chart_x_widget.selectbox('**Select the Category :**', Fact_Columns)
 
 
-selected_category= st.multiselect('Select Subcategory to view',     
+selected_category= st.multiselect('**Select Subcategory to view**',     
                                   get_unique_items_list_in_column(Scatter_Category_to_view),
-                                  default= get_unique_items_list_in_column(Scatter_Category_to_view))
+                                  default= get_unique_items_list_in_column(Scatter_Category_to_view),
+                                   key='selected_category')
+
+st.markdown(f'#### Relationship between {Scatter_x_axis} and {Scatter_y_axis} for Selected {Scatter_Category_to_view} ')
     
 #check if the selected product list is empty
 if selected_category != []:
     # Call the create_stacked_bar_chart function with the selected columns
-    scatter_chart(Scatter_x_axis, Scatter_y_axis, Scatter_Category_to_view, selected_category)  
+    scatter_chart=st.columns(1)[0]
+    create_scatter_chart(Scatter_x_axis, Scatter_y_axis, Scatter_Category_to_view, selected_category)
+    
     
 else:
         #Display a select a product message
-        st.write(f'### Please select the subcategory of {Scatter_Category_to_view} to view.')
+        scatter_chart=st.write(f'### Please select the subcategory of {Scatter_Category_to_view} to view.')
         
   
 
