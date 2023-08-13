@@ -461,9 +461,26 @@ def get_year_as_String(year_considered):
 
 #======================================================================================================
 
-
-
 st.set_page_config(layout='wide')
+
+st.sidebar.header('Company\'s Financials Dashboard. `version 0.1`')
+
+st.sidebar.markdown('''
+
+---
+
+Created by [Ajigbayi, Oluwafemi Tosin.](https://www.linkedin.com/in/oluwafemi-ajigbayi) 
+
+
+This dashboard was created using the [Company Financials](https://www.kaggle.com/datasets/atharvaarya25/financials) Dataset from Kaggle. 
+
+The code for this project is available on [Github](https://github.com/femstac/kaggle_Company_Financials.git).
+
+--- 
+I am always looking for ways to improve my work and will welcome any feedback or suggestions. 
+
+If you have any ideas for improvements or would like to collaborate, please don’t hesitate to reach out to me. Thank you! :heart:
+''')
 
 
 st.title(':chart: :office: Interactive Web App for Analysis of a Company\'s Financial Record' )

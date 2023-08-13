@@ -1,0 +1,9 @@
+bokeh==3.2.1
+holoviews==1.17.0
+hvplot==0.8.4
+matplotlib==3.7.2
+numpy==1.25.0
+pandas==1.5.3
+panel==1.2.1
+seaborn==0.12.2
+streamlit==1.25.0
