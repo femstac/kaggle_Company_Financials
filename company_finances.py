@@ -282,12 +282,19 @@ def create_stacked_bar_chart(x_axis, y_axis, product_List):
         # Set the y-axis ticks to display as real numbers instead of scientific notation
         chart.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.0f'))
         
-        # Wrap the x-axis tick labels
-        tick_labels = [textwrap.fill(label, 10) for label in bar_df[bar_x_axis]]
-        
+            # Wrap the x-axis tick labels
+        tick_labels = [textwrap.fill(label, 10) for label in products_df_pivot.index]
+
         # Set the x-axis ticks and tick labels
-        chart.set_xticks(range(len(bar_df[bar_x_axis])))
+        chart.set_xticks(range(len(products_df_pivot.index)))
         chart.set_xticklabels(tick_labels, fontsize=9)
+
+#         # Wrap the x-axis tick labels
+#         tick_labels = [textwrap.fill(label, 10) for label in bar_df[bar_x_axis]]
+        
+#         # Set the x-axis ticks and tick labels
+#         chart.set_xticks(range(len(bar_df[bar_x_axis])))
+#         chart.set_xticklabels(tick_labels, fontsize=9)
         
         # Set the font weight of the x-axis tick labels to bold
         for label in chart.get_xticklabels():
@@ -463,7 +470,7 @@ def get_year_as_String(year_considered):
 
 st.set_page_config(layout='wide')
 
-st.sidebar.header('Company\'s Financials Dashboard. `version 0.1`')
+st.sidebar.header('Company\'s Financials Dashboard. `version 0.2`')
 
 st.sidebar.markdown('''
 
