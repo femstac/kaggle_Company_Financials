@@ -7,16 +7,18 @@ import textwrap
 
 
 
+# Check File Contents
+df = pd.read_csv('Financials.csv')
+
+
 # Pre-processing:
 # 1. Check for column names and Fix Errors
 # 2. Remove $ sign and '-' from all columns where they are present
 # 3. Change datatype from objects to int after the above two.
 # 4. Removing " , " (comma) from all numerical numbers.
-# Check File Contents
-
-df = pd.read_csv('Financials.csv')
-
 # Trim All White spaces in object columns in the dataset
+
+
 # Select columns of object and string data types from the DataFrame 'df'
 df_obj = df.select_dtypes(['object', 'string'])
 
@@ -28,7 +30,6 @@ df.columns = df.columns.str.strip()
 
 
 # Create variables for Column Names
-
 [ Segment, Country, Product, Discount_Band, Units_Sold,
  Manufacturing_Price, Sale_Price, Gross_Sales, Discounts,
  Sales, COGS, Profit, Date, Month_Number, Month_Name, Year
@@ -37,13 +38,15 @@ df.columns = df.columns.str.strip()
  'Sales', 'COGS', 'Profit', 'Date', 'Month Number', 'Month Name', 'Year'] 
 
 
-
-# Seperate Columns to Facts (i.e Categorical) and Numerical Columns
+# Seperate Columns into Facts (i.e Categorical) and Numerical Columns
 Numerical_Columns = [Units_Sold, Manufacturing_Price, Sale_Price, Gross_Sales, Discounts, Sales, COGS, Profit]
 
 Fact_Columns = [Segment, Country, Product, Discount_Band]
 
 Varying_Numerical_Columns =  [Gross_Sales, Discounts, Sales, COGS, Profit]
+
+#This is basically repeated in the Date Column
+Non_Essential_columns = [Month_Number, Month_Name, Year]
 
 
 # Remove all special characters in Numerical Columns
@@ -52,15 +55,14 @@ df[Numerical_Columns] = df[Numerical_Columns].replace({'\$':'','-':'0',',':''},r
 # Numbers in () are Negative, therefore Preppend '-' to the values in brackets
 df[Numerical_Columns] = df[Numerical_Columns].replace({'\(':'-','\)':'',' ':''},regex=True)
  
-# Convert Numerical columns to Float data type and Units Sold to Integer whole number
+# Convert Numerical columns to Float data type and Units Sold column to Integer whole numbers
 df[Numerical_Columns] = df[Numerical_Columns].astype(float)
 df[Units_Sold] = df[Units_Sold].astype(int)
  
-# Convert date to datetime
+# Convert date column to datetime
 df[Date] = pd.to_datetime(df[Date])
 
 # Delete Non essential columns
-Non_Essential_columns = [Month_Number, Month_Name, Year]
 df = df.drop(Non_Essential_columns, axis=1)
 
 
