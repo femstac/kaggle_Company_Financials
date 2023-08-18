@@ -38,10 +38,10 @@ df.columns = df.columns.str.strip()
 
 
 
-# Seperate Columns to Facts (i.e Categorical) and Numerical Columns
+# Seperate Columns to Dimensions (i.e Categorical) and Numerical Columns
 Numerical_Columns = [Units_Sold, Manufacturing_Price, Sale_Price, Gross_Sales, Discounts, Sales, COGS, Profit]
 
-Fact_Columns = [Segment, Country, Product, Discount_Band]
+Dimension_Columns = [Segment, Country, Product, Discount_Band]
 
 Varying_Numerical_Columns =  [Gross_Sales, Discounts, Sales, COGS, Profit]
 
@@ -389,15 +389,15 @@ def create_bump_chart(y_axis, categorical_label, year_considered, categorical_la
     
 #======================================================================================================
 
-def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
+def create_scatter_chart(x_axis, y_axis, Dimension_category, Dimension_subcategory_list):
     """
     Generates a scatter chart using Matplotlib.
     
     Parameters:
     x_axis: The column name to use as the x-axis.
     y_axis: The column name to use as the y-axis.
-    fact_category: The column name to use as the category for coloring the points.
-    fact_subcategory_list: A list of subcategories to include in the chart.
+    Dimension_category: The column name to use as the category for coloring the points.
+    Dimension_subcategory_list: A list of subcategories to include in the chart.
     
     Returns:
     None
@@ -408,23 +408,23 @@ def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
         # Create a copy of the dataframe
         scatter_df = df.copy()
         
-        # Filter the data to include only subcategories in fact_subcategory_list
-        scatter_df_filtered = scatter_df[scatter_df[fact_category].isin(fact_subcategory_list)].reset_index().reset_index(drop=True)
+        # Filter the data to include only subcategories in Dimension_subcategory_list
+        scatter_df_filtered = scatter_df[scatter_df[Dimension_category].isin(Dimension_subcategory_list)].reset_index().reset_index(drop=True)
         
-        # Select only the x-axis, y-axis, and fact_category columns
-        scatter_df_filtered = scatter_df_filtered[[x_axis, y_axis, fact_category]]
+        # Select only the x-axis, y-axis, and Dimension_category columns
+        scatter_df_filtered = scatter_df_filtered[[x_axis, y_axis, Dimension_category]]
         
-        # Sort the data by fact_category
-        scatter_df_filtered = scatter_df_filtered.sort_values(by=fact_category)
+        # Sort the data by Dimension_category
+        scatter_df_filtered = scatter_df_filtered.sort_values(by=Dimension_category)
         
         # Define a list of complimentary colors for the scatter chart
         complimentary_colors = ["#ba2649", "#ffa7ca", "#1a6b54", "#f7d560", "#5c3c92", "#f2a0a1"]
         
         # Create a dictionary mapping subcategories to colors
-        colors = dict(zip(fact_subcategory_list, complimentary_colors))
+        colors = dict(zip(Dimension_subcategory_list, complimentary_colors))
        
         # Create a list of colors for each point in the chart
-        scatter_colors = [colors[c] for c in scatter_df_filtered[fact_category]]
+        scatter_colors = [colors[c] for c in scatter_df_filtered[Dimension_category]]
 
         # Create a scatter chart using Matplotlib
         fig, ax = plt.subplots(figsize=(5,3))
@@ -438,7 +438,7 @@ def create_scatter_chart(x_axis, y_axis, fact_category, fact_subcategory_list):
         
         
         # Add a legend to the chart
-        for parts in fact_subcategory_list:
+        for parts in Dimension_subcategory_list:
             plt.scatter([], [], c=colors[parts], label=parts)
             # plt.legend(loc='lower left', ncol=2)
         
@@ -507,7 +507,7 @@ col11,col12 = col_ab.columns(2)
 
     
 # Create widgets to select the x-axis and y-axis columns
-bar_x_axis = col11.selectbox('**For each**', Fact_Columns)
+bar_x_axis = col11.selectbox('**For each**', Dimension_Columns)
 bar_y_axis = col11.selectbox('**Select total amount of :**', Numerical_Columns)
 
 selected_products= col12.multiselect('**Select Products to view**', get_unique_items_list_in_column(Product),
@@ -560,7 +560,7 @@ col41,col42,col43 = st.columns([1,7,1]) #create 3 columns, where the middle one 
   
     
 # Create widgets to select the x-axis and y-axis columns
-bump_x_widget= col21.selectbox(' **Select Category :**', Fact_Columns)
+bump_x_widget= col21.selectbox(' **Select Category :**', Dimension_Columns)
 
 bump_y_widget=col31.selectbox('**Select Numerical Section :**', Numerical_Columns)
 
@@ -603,7 +603,7 @@ Scatter_y_axis = col52.selectbox('**Select Y-axis :**', Varying_Numerical_Column
 
 
 
-Scatter_Category_to_view = col61.selectbox('**Select the Category :**', Fact_Columns)
+Scatter_Category_to_view = col61.selectbox('**Select the Category :**', Dimension_Columns)
 
 
 selected_category= col62.multiselect('**Select Subcategory to view**',     
